@@ -7,6 +7,8 @@ Rails.application.routes.draw do
 
   post 'users/login'
 
+  get 'users/login'
+
   # displays the registration form
   root 'users#index'
 

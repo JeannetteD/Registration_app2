@@ -3,18 +3,47 @@ class UsersController < ApplicationController
   end
 
   def register
-    @user = User.new
-    @user.full_name = params[:full_name]
-    @user.street_address = params[:street_address]
-    @user.city = params[:city]
-    @user.state = params[:state]
-    @user.postal_code = params[:postal_code]
-    @user.country = params[:country]
-    @user.email = params[:email]
-    @user.user_id = params[:user_id]
-    @user.password = params[:password]
-    @user.save
-  end
+    if User.find_by_user_id(params[:user_id]).nil?
+      # User ID unkown save user in database with phones
+      @user = User.new
+      @user.full_name = params[:full_name]
+      @user.street_address = params[:street_address]
+      @user.city = params[:city]
+      @user.state = params[:state]
+      @user.postal_code = params[:postal_code]
+      @user.country = params[:country]
+      @user.email = params[:email]
+      @user.user_id = params[:user_id]
+      @user.password = params[:password]
+      if !params[:cell_phone].strip.empty?
+        @phone = Phone.new
+        @phone.number = params[:cell_phone]
+        @user.phones << @phone
+        @phone.save
+      end
+
+      if !params[:home_phone].strip.empty?
+        @phone = Phone.new
+        @phone.number = params[:home_phone]
+        @user.phones << @phone
+        @phone.save
+      end
+
+      if !params[:work_phone].strip.empty?
+        @phone = Phone.new
+        @phone.number = params[:work_phone]
+        @user.phones << @phone
+        @phone.save
+      end
+      @user.save
+      render :register
+    else
+      # User ID known, so don't register user
+      # Redirct with error message
+      flash[:notice2] = "User ID taken, try another"
+      redirect_to "/"
+    end
+  end #def register
 
   def login
     # takes user id entered in the log in form and stores it in the user_id variable
@@ -30,9 +59,9 @@ class UsersController < ApplicationController
       render :login
     else
       # if it's not a match, it discplays an error message.
-      render text: "Incorrect user id or password"
+      # the / is the root route. the "?" mark indicates login_failed is a parameter (a key) and true is its value.
+      flash[:notice1] = "Log in failed, try again!"
+      redirect_to '/'
     end
-
-
-  end
-end
+  end #def login
+end #class
